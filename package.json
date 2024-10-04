@@ -11,6 +11,7 @@
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "files": ["media"],
   "contributes": {
     "commands": [
       {
@@ -34,14 +35,15 @@
     "views": {
       "vietcode-sidebar": [
         {
-          "id": "vietcodeSidebar",
-          "name": "VietCode"
+          "type": "webview",
+          "id": "vietCodeChatView",
+          "name": "Chat"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "vietcodeSidebar",
+        "view": "vietcode-sidebar",
         "contents": "Welcome to VietCode extension. [Generate Code](command:vietcode.generateCode)"
       }
     ]
