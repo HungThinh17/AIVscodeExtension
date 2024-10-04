@@ -16,6 +16,33 @@
       {
         "command": "vietcode.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "vietcode.generateCode",
+        "title": "Generate Code"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vietcode-sidebar",
+          "title": "VietCode",
+          "icon": "resources/dark/vietcode.svg"
+        }
+      ]
+    },
+    "views": {
+      "vietcode-sidebar": [
+        {
+          "id": "vietcodeSidebar",
+          "name": "VietCode"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "vietcodeSidebar",
+        "contents": "Welcome to VietCode extension. [Generate Code](command:vietcode.generateCode)"
       }
     ]
   },

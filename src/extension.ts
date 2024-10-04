@@ -1,26 +1,72 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+// VietCodeItem definition
+class VietCodeItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly commandId: string,
+        public readonly iconPath?: string
+    ) {
+        super(label, collapsibleState);
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vietcode" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vietcode.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from VietCode!');
-	});
-
-	context.subscriptions.push(disposable);
+        this.command = {
+            command: commandId,
+            title: label,
+        };
+    }
 }
 
-// This method is called when your extension is deactivated
+// VietCodeViewProvider definition
+class VietCodeViewProvider implements vscode.TreeDataProvider<VietCodeItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<VietCodeItem | undefined | void> = new vscode.EventEmitter<VietCodeItem | undefined | void>();
+    readonly onDidChangeTreeData: vscode.Event<VietCodeItem | undefined | void> = this._onDidChangeTreeData.event;
+
+    constructor(private context: vscode.ExtensionContext) {}
+
+    getTreeItem(element: VietCodeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: VietCodeItem): Thenable<VietCodeItem[]> {
+        if (element) {
+            return Promise.resolve([]); // No child items for now
+        }
+        // Create items for the top-level view
+        return Promise.resolve([
+            new VietCodeItem('Generate Code', vscode.TreeItemCollapsibleState.None, 'vietcode.generateCode', 'code'),
+            new VietCodeItem('Hello World', vscode.TreeItemCollapsibleState.None, 'vietcode.helloWorld', 'symbol-event')
+        ]);
+    }
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+}
+
+export function activate(context: vscode.ExtensionContext) {
+    // Create an instance of VietCodeViewProvider
+    const vietCodeViewProvider = new VietCodeViewProvider(context);
+
+    // Register the tree view provider
+    const treeView = vscode.window.createTreeView('vietcodeSidebar', {
+        treeDataProvider: vietCodeViewProvider
+    });
+
+    // Register commands
+    const helloWorldCommand = vscode.commands.registerCommand('vietcode.helloWorld', () => {
+        vscode.window.showInformationMessage('Hello World from VietCode!');
+    });
+
+    const generateCodeCommand = vscode.commands.registerCommand('vietcode.generateCode', () => {
+        vscode.window.showInformationMessage('Generate Code command triggered!');
+        // Your logic for generating code goes here
+    });
+
+    // Manage subscriptions
+    context.subscriptions.push(treeView);
+    context.subscriptions.push(helloWorldCommand);
+    context.subscriptions.push(generateCodeCommand);
+}
+
 export function deactivate() {}
