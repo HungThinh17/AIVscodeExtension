@@ -17,7 +17,15 @@
         "command": "vietcode.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "views": {
+        "explorer": [
+            {
+                "id": "vietcodeSidebar",
+                "name": "VietCode"
+            }
+        ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
