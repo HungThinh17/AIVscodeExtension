@@ -1,24 +1,23 @@
 import * as vscode from 'vscode';
 
-export function activate(context: vscode.ExtensionContext) {
-    // Register the hello world command
-    const helloWorldCommand = vscode.commands.registerCommand('vietcode.helloWorld', () => {
-        vscode.window.showInformationMessage('Hello World from VietCode!');
-    });
+// VietCodeItem definition
+class VietCodeItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly commandId: string,
+        public readonly iconPath?: string
+    ) {
+        super(label, collapsibleState);
 
-    // Register the generate code command
-    const generateCodeCommand = vscode.commands.registerCommand('vietcode.generateCode', () => {
-        vscode.window.showInformationMessage('Code generation logic would go here!');
-    });
-
-    // Register the tree view provider
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('vietcodeSidebar', new VietCodeViewProvider(context)));
-    context.subscriptions.push(helloWorldCommand);
-    context.subscriptions.push(generateCodeCommand);
+        this.command = {
+            command: commandId,
+            title: label,
+        };
+    }
 }
 
-export function deactivate() {}
-
+// VietCodeViewProvider definition
 class VietCodeViewProvider implements vscode.TreeDataProvider<VietCodeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<VietCodeItem | undefined | void> = new vscode.EventEmitter<VietCodeItem | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<VietCodeItem | undefined | void> = this._onDidChangeTreeData.event;
@@ -31,36 +30,43 @@ class VietCodeViewProvider implements vscode.TreeDataProvider<VietCodeItem> {
 
     getChildren(element?: VietCodeItem): Thenable<VietCodeItem[]> {
         if (element) {
-            return Promise.resolve([]); // No child items
+            return Promise.resolve([]); // No child items for now
         }
-        // Create items for the top-level view, passing the context
+        // Create items for the top-level view
         return Promise.resolve([
-            new VietCodeItem('Generate Code', vscode.TreeItemCollapsibleState.None, 'vietcode.generateCode', this.context), // Pass the context
+            new VietCodeItem('Generate Code', vscode.TreeItemCollapsibleState.None, 'vietcode.generateCode', 'code'),
+            new VietCodeItem('Hello World', vscode.TreeItemCollapsibleState.None, 'vietcode.helloWorld', 'symbol-event')
         ]);
     }
-}
 
-class VietCodeItem extends vscode.TreeItem {
-    iconPath: { light: string; dark: string }; // Declare iconPath without initializing it
-
-    constructor(
-        public readonly label: string,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly commandId: string,
-        private readonly context: vscode.ExtensionContext // Add context as a private member
-    ) {
-        super(label, collapsibleState);
-
-        // Set the command property correctly
-        this.command = {
-            command: commandId,
-            title: label,
-        };
-
-        // Initialize the iconPath here
-        this.iconPath = {
-            light: this.context.asAbsolutePath('resources/vietcode.svg'), // Specify the path to your icon
-            dark: this.context.asAbsolutePath('resources/vietcode.svg')   // Specify the path to your icon
-        };
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
     }
 }
+
+export function activate(context: vscode.ExtensionContext) {
+    // Create an instance of VietCodeViewProvider
+    const vietCodeViewProvider = new VietCodeViewProvider(context);
+
+    // Register the tree view provider
+    const treeView = vscode.window.createTreeView('vietcodeSidebar', {
+        treeDataProvider: vietCodeViewProvider
+    });
+
+    // Register commands
+    const helloWorldCommand = vscode.commands.registerCommand('vietcode.helloWorld', () => {
+        vscode.window.showInformationMessage('Hello World from VietCode!');
+    });
+
+    const generateCodeCommand = vscode.commands.registerCommand('vietcode.generateCode', () => {
+        vscode.window.showInformationMessage('Generate Code command triggered!');
+        // Your logic for generating code goes here
+    });
+
+    // Manage subscriptions
+    context.subscriptions.push(treeView);
+    context.subscriptions.push(helloWorldCommand);
+    context.subscriptions.push(generateCodeCommand);
+}
+
+export function deactivate() {}
