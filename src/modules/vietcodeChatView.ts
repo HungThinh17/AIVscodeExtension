@@ -22,13 +22,18 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
             path.join(this.context.extensionPath, 'src/media', 'chatView.html')
         );
         let htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf-8');
-
-        // Replace ${webview.cspSource} with the actual CSP source
-        htmlContent = htmlContent.replace(
-            /\$\{webview\.cspSource\}/g,
-            this.webviewView?.webview.cspSource || ''
+    
+        // Get the local path to main script run in the webview, then get the URI of it for use in the webview
+        const scriptPathOnDisk = vscode.Uri.file(
+            path.join(this.context.extensionPath, 'dist', 'chatview.js')
         );
-
+        const scriptUri = this.webviewView?.webview.asWebviewUri(scriptPathOnDisk);
+    
+        // Replace placeholders in the HTML file
+        htmlContent = htmlContent
+            .replace(/\$\{webview\.cspSource\}/g, this.webviewView?.webview.cspSource || '')
+            .replace(/\$\{scriptUri\}/g, scriptUri?.toString() || '');
+    
         return htmlContent;
     }
 

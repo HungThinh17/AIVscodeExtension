@@ -60,3 +60,7 @@ function appendMessage(sender: string, message: string) {
     chatOutput.appendChild(messageElement);
     chatOutput.scrollTop = chatOutput.scrollHeight;
 }
+
+export const ChatView = {
+    initializeChatView: initializeChatView
+};
