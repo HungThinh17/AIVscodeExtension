@@ -15,27 +15,11 @@
 
 ### 1.0.0
 
-Initial release of ...
+Initial release of ai vscode extension project.
 
 ### 1.0.1
 
-Fixed issue #.
+Basic chat feature added.
 
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-
-## For more information
 
 **Enjoy!**
