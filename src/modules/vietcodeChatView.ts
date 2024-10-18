@@ -2,7 +2,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { EventEmitter } from 'events';
-import { callOllamaModel } from './vietcodeItem';
+import { callOllamaModel } from './aiModel';
+import * as commonmark from 'commonmark';
 
 export class ChatWebviewView implements vscode.WebviewViewProvider {
     private webviewView: vscode.WebviewView | undefined;
@@ -24,18 +25,25 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
             path.join(this.context.extensionPath, 'src/media', 'chatView.html')
         );
         let htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf-8');
-
+    
         // Get the local path to main script run in the webview, then get the URI of it for use in the webview
         const scriptPathOnDisk = vscode.Uri.file(
             path.join(this.context.extensionPath, 'dist', 'chatview.js')
         );
         const scriptUri = this.webviewView?.webview.asWebviewUri(scriptPathOnDisk);
-
+    
+        // Get the local path to CSS file, then get the URI of it for use in the webview
+        const cssPathOnDisk = vscode.Uri.file(
+            path.join(this.context.extensionPath, 'src/media', 'styles.css')
+        );
+        const cssUri = this.webviewView?.webview.asWebviewUri(cssPathOnDisk);
+    
         // Replace placeholders in the HTML file
         htmlContent = htmlContent
             .replace(/\$\{webview\.cspSource\}/g, this.webviewView?.webview.cspSource || '')
-            .replace(/\$\{scriptUri\}/g, scriptUri?.toString() || '');
-
+            .replace(/\$\{scriptUri\}/g, scriptUri?.toString() || '')
+            .replace(/\$\{cssUri\}/g, cssUri?.toString() || '');
+    
         return htmlContent;
     }
 
@@ -59,12 +67,14 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
         let waitingInterval: NodeJS.Timeout;
         const messageQueue: string[] = []; // Message queue to handle messages
         let isProcessingQueue = false; // State variable to track queue processing
+        const parser = new commonmark.Parser();
+        const renderer = new commonmark.HtmlRenderer();
     
         const startWaitingEffect = () => {
-            let dots = '';
+            let dots = '.';
             this.webviewView?.webview.postMessage({
                 type: 'addMessage',
-                sender: 'Bot',
+                sender: 'Coder',
                 value: dots
             });
     
@@ -72,10 +82,10 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
                 dots = dots.length < 3 ? dots + '.' : '';
                 this.webviewView?.webview.postMessage({
                     type: 'updateMessage',
-                    sender: 'Bot',
+                    sender: 'Coder',
                     value: dots
                 });
-            }, 500); // Update every 500ms
+            }, 200); // Update every 500ms
         }
     
         const clearWaitingEffect = () => {
@@ -90,10 +100,12 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
                 if (message) {
                     console.log("__Received message: ", message);
                     isProcessingQueue = true; // Set processing state to true
+                    const parserMessage = parser.parse(message);
+                    const rendererMessage = renderer.render(parserMessage);
                     this.webviewView?.webview.postMessage({
                         type: 'updateMessage',
-                        sender: 'Bot',
-                        value: message
+                        sender: 'Coder',
+                        value: rendererMessage
                     });
     
                     // Reset processing state after a brief delay to allow UI to update
@@ -137,7 +149,12 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
         }
     
         // Clear the queue interval when processing is complete
-        emitter.on('end', () => clearInterval(queueInterval));
+        emitter.on('end', () => {
+            // Clean up resources
+            emitter.removeAllListeners();
+            clearWaitingEffect();
+            clearInterval(queueInterval)
+        });
     }
     
     public addMessage(sender: string, message: string) {

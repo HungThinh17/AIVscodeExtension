@@ -18,7 +18,7 @@ interface ChatMessage {
 
 let vscode: VSCodeAPI;
 
-export function initializeChatView() {
+function initializeChatView() {
     vscode = acquireVsCodeApi();
     const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
     const userInput = document.getElementById('user-input') as HTMLInputElement;
@@ -32,7 +32,8 @@ export function initializeChatView() {
         if (e.key === 'Enter') {
             const message = userInput.value;
             vscode.postMessage({ type: 'userInput', value: message });
-            appendMessage('User', message);
+            const fragment = document.createRange().createContextualFragment(message);
+            appendMessage('You', fragment);
             userInput.value = '';
         }
     });
@@ -42,28 +43,31 @@ export function initializeChatView() {
         switch (message.type) {
             case 'addMessage':
                 if (message.sender && message.value) {
-                    appendMessage(message.sender, message.value);
+                    const fragment = document.createRange().createContextualFragment(message.value);
+                    appendMessage(message.sender, fragment);
                 }
                 break;
             case 'updateMessage': // New case for handling updates
                 if (message.sender && message.value) {
                     // Assuming you have a function to update the existing message
-                    updateMessage(message.sender, message.value);
+                    const fragment = document.createRange().createContextualFragment(message.value);
+                    updateMessage(message.sender, fragment);
                 }
                 break;
             case 'finalizeMessage': // Optional: Handle final message if needed
                 if (message.sender && message.value) {
-                    appendMessage(message.sender, message.value); // You can append or replace the message
+                    const fragment = document.createRange().createContextualFragment(message.value);
+                    appendMessage(message.sender, fragment); // You can append or replace the message
                 }
                 break;
             default:
                 console.warn("Unknown message type:", message.type);
                 break;
         }
-    });
-}
 
-function updateMessage(sender: string, message: string) {
+    });}
+
+function updateMessage(sender: string, message: string|DocumentFragment) {
     const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
     if (!chatOutput) {
         console.error('Chat output element not found');
@@ -71,26 +75,25 @@ function updateMessage(sender: string, message: string) {
     }
 
     // Find all message elements in the chat output
-    const messageElements = chatOutput.querySelectorAll('div');
-    let latestMessageElement: HTMLElement | null = null;
-
-    // Iterate through messages to find the latest one from the sender
-    for (let i = messageElements.length - 1; i >= 0; i--) {
-        const element = messageElements[i];
-        // Check if the element's text starts with the sender's name
-        if (element.textContent && element.textContent.startsWith(`${sender}:`)) {
-            latestMessageElement = element; // Store reference to the latest message
-            break; // Exit loop once the latest message is found
-        }
-    }
+    const messageElements = chatOutput.querySelectorAll('div.message.bot-message');
+    let latestMessageElement = messageElements[messageElements.length - 1];
 
     // Update the latest message, or append a new one if none found
     if (latestMessageElement) {
-        latestMessageElement.textContent = `${sender}: ${message}`; // Update the latest message text
+        if (message instanceof DocumentFragment) {
+            latestMessageElement.innerHTML = '';
+            latestMessageElement.appendChild(message);
+        } else {
+            latestMessageElement.textContent = message;
+        }
     } else {
         // If no previous message found, create a new one
         const newMessageElement = document.createElement('div');
-        newMessageElement.textContent = `${sender}: ${message}`;
+        if (message instanceof DocumentFragment) {
+            newMessageElement.appendChild(message);
+        } else {
+            newMessageElement.textContent = message;
+        }
         chatOutput.appendChild(newMessageElement);
     }
 
@@ -99,18 +102,22 @@ function updateMessage(sender: string, message: string) {
 }
 
 
-function appendMessage(sender: string, message: string) {
+function appendMessage(sender: string, message: string|DocumentFragment) {
     const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
     if (!chatOutput) {
         console.error('Chat output element not found');
         return;
     }
     const messageElement = document.createElement('div');
-    messageElement.textContent = `${sender}: ${message}`;
+    messageElement.classList.add('message');
+    messageElement.classList.add(sender === 'Coder' ? 'bot-message' : 'user-message');
+    if (message instanceof DocumentFragment) {
+        messageElement.appendChild(message);
+    } else {
+        messageElement.textContent = message;
+    }
     chatOutput.appendChild(messageElement);
     chatOutput.scrollTop = chatOutput.scrollHeight;
 }
 
-export const ChatView = {
-    initializeChatView: initializeChatView
-};
+initializeChatView();
