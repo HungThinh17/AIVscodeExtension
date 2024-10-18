@@ -1,5 +1,24 @@
 
 import * as commonmark from 'commonmark';
+import hljs from 'highlight.js';
+
+import javascript from 'highlight.js/lib/languages/javascript';
+import c from 'highlight.js/lib/languages/c';
+import cpp from 'highlight.js/lib/languages/cpp';
+import csharp from 'highlight.js/lib/languages/csharp';
+import python from 'highlight.js/lib/languages/python';
+import java from 'highlight.js/lib/languages/java';
+import rust from 'highlight.js/lib/languages/rust';
+import delphi from 'highlight.js/lib/languages/delphi'; // Pascal is part of Delphi in highlight.js
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('c', c);
+hljs.registerLanguage('cpp', cpp);
+hljs.registerLanguage('csharp', csharp);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('java', java);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('delphi', delphi); // This will handle Pascal
 
 declare function acquireVsCodeApi(): {
     postMessage(message: any): void;
@@ -26,7 +45,31 @@ const renderer = new commonmark.HtmlRenderer();
 function formatMessage(message: string): HTMLElement {
     let retElement = document.createElement('div');
     const parsed = parser.parse(message);
-    retElement.innerHTML = renderer.render(parsed);
+    
+    // Convert the parsed content to HTML
+    let htmlContent = renderer.render(parsed);
+    
+    // Use a regular expression to find code blocks
+    const codeBlockRegex = /<pre><code>([\s\S]*?)<\/code><\/pre>/g;
+    
+    htmlContent = htmlContent.replace(codeBlockRegex, (match, codeContent) => {
+        // Unescape HTML entities
+        const unescapedCode = codeContent
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&nbsp;/g, ' ');
+        
+        // Auto-detect language and highlight
+        const highlighted = hljs.highlightAuto(unescapedCode);
+        
+        // Return the highlighted code wrapped in pre and code tags
+        return `<pre><code class="hljs ${highlighted.language}">${highlighted.value}</code></pre>`;
+    });
+    
+    retElement.innerHTML = htmlContent;
     return retElement;
 }
 

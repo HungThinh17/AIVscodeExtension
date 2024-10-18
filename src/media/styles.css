@@ -177,3 +177,36 @@ body {
     background-color: var(--vscode-tab-activeBackground);
     border-bottom: none;
 }
+
+pre code {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+    background-color: #000000 !important; /* Black background */
+    color: #ffffff !important; /* White text for non-highlighted parts */
+    font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    line-height: var(--vscode-editor-line-height);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Bright colors for syntax highlighting */
+.hljs-keyword { color: #ff79c6; } /* Pink */
+.hljs-built_in { color: #8be9fd; } /* Cyan */
+.hljs-type { color: #8be9fd; } /* Cyan */
+.hljs-literal { color: #bd93f9; } /* Purple */
+.hljs-number { color: #bd93f9; } /* Purple */
+.hljs-regexp { color: #ff5555; } /* Red */
+.hljs-string { color: #f1fa8c; } /* Yellow */
+.hljs-subst { color: #f8f8f2; } /* White */
+.hljs-symbol { color: #ff79c6; } /* Pink */
+.hljs-class { color: #50fa7b; } /* Green */
+.hljs-function { color: #50fa7b; } /* Green */
+.hljs-title { color: #50fa7b; } /* Green */
+.hljs-params { color: #f8f8f2; } /* White */
+.hljs-comment { color: #6272a4; } /* Blue-grey */
+.hljs-doctag { color: #ff79c6; } /* Pink */
+.hljs-meta,
+.hljs-meta-keyword { color: #50fa7b; } /* Green */
+.hljs-meta-string { color: #f1fa8c; } /* Yellow */

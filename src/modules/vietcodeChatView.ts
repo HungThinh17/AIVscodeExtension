@@ -36,12 +36,18 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
             path.join(this.context.extensionPath, 'src/media', 'styles.css')
         );
         const cssUri = this.webviewView?.webview.asWebviewUri(cssPathOnDisk);
+
+        const hljscssPathOnDisk = vscode.Uri.file(
+            path.join(this.context.extensionPath, 'node_modules/highlight.js/styles', 'default.css')
+        );
+        const hljscssUri = this.webviewView?.webview.asWebviewUri(hljscssPathOnDisk);
     
         // Replace placeholders in the HTML file
         htmlContent = htmlContent
             .replace(/\$\{webview\.cspSource\}/g, this.webviewView?.webview.cspSource || '')
             .replace(/\$\{scriptUri\}/g, scriptUri?.toString() || '')
-            .replace(/\$\{cssUri\}/g, cssUri?.toString() || '');
+            .replace(/\$\{cssUri\}/g, cssUri?.toString() || '')
+            .replace(/\$\{hljscssUri\}/g, hljscssUri?.toString() || '');
     
         return htmlContent;
     }

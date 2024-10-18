@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@types/commonmark": "^0.27.9",
+    "@types/highlight.js": "^9.12.4",
     "@types/mocha": "^10.0.8",
     "@types/node": "20.x",
     "@types/vscode": "^1.94.0",
@@ -70,7 +71,9 @@
     "@typescript-eslint/parser": "^8.7.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "css-loader": "^7.1.2",
     "eslint": "^9.11.1",
+    "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",
     "webpack": "^5.95.0",
@@ -78,6 +81,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
-    "commonmark": "^0.31.2"
+    "commonmark": "^0.31.2",
+    "highlight.js": "^11.10.0"
   }
 }

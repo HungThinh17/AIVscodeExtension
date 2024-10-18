@@ -37,6 +37,11 @@ const extensionConfig = {
             loader: 'ts-loader'
           }
         ]
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+        exclude: /node_modules/
       }
     ]
   },
@@ -63,9 +68,14 @@ const chatviewConfig = {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+        exclude: /node_modules/
       }
     ]
-  },
+  },  
   target: 'web',
   mode:'none'
 };
