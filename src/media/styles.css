@@ -44,10 +44,12 @@ body {
 }
 
 .message {
-    max-width: 70%;
-    margin-bottom: 10px;
-    padding: 10px;
+    max-width: 90%;
+    padding-left: 10px;
+    padding-right: 10px;
     border-radius: 10px;
+    margin-top: 3px;
+    margin-bottom: 3px;
     clear: both;
 }
 
@@ -59,16 +61,53 @@ body {
 }
 
 .bot-message {
+    min-width: 90%;
+    position: relative;
+    padding-bottom: 5px;
     float: left;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
+}
+
+.bot-message-content {
     text-align: left;
 }
 
-#chat-output::after {
-    content: "";
-    display: table;
-    clear: both;
+.message-separator {
+    border: 0;
+    height: 1px;
+    background-color: var(--element-border-color);
+    margin: 10px 0;
+}
+
+.interaction-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.interaction-button {
+    background: none;
+    border: 1px solid var(--element-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.interaction-button:hover {
+    opacity: 0.7;
+}
+
+.interaction-button i {
+    font-size: 12px;
+    color: var(--element-border-color);
+}
+
+.interaction-button.like-button i,
+.interaction-button.dislike-button i {
+    color: var(--element-border-color);
 }
 
 #chat-container {

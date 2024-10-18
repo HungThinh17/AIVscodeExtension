@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { EventEmitter } from 'events';
 import { callOllamaModel } from './aiModel';
-import * as commonmark from 'commonmark';
 
 export class ChatWebviewView implements vscode.WebviewViewProvider {
     private webviewView: vscode.WebviewView | undefined;
@@ -67,8 +66,6 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
         let waitingInterval: NodeJS.Timeout;
         const messageQueue: string[] = []; // Message queue to handle messages
         let isProcessingQueue = false; // State variable to track queue processing
-        const parser = new commonmark.Parser();
-        const renderer = new commonmark.HtmlRenderer();
     
         const startWaitingEffect = () => {
             let dots = '.';
@@ -100,12 +97,10 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
                 if (message) {
                     console.log("__Received message: ", message);
                     isProcessingQueue = true; // Set processing state to true
-                    const parserMessage = parser.parse(message);
-                    const rendererMessage = renderer.render(parserMessage);
                     this.webviewView?.webview.postMessage({
                         type: 'updateMessage',
                         sender: 'Coder',
-                        value: rendererMessage
+                        value: message
                     });
     
                     // Reset processing state after a brief delay to allow UI to update
