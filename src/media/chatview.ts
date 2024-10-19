@@ -43,33 +43,50 @@ const parser = new commonmark.Parser();
 const renderer = new commonmark.HtmlRenderer();
 
 function formatMessage(message: string): HTMLElement {
-    let retElement = document.createElement('div');
+    const retElement = document.createElement('div');
     const parsed = parser.parse(message);
     
     // Convert the parsed content to HTML
     let htmlContent = renderer.render(parsed);
     
-    // Use a regular expression to find code blocks
-    const codeBlockRegex = /<pre><code>([\s\S]*?)<\/code><\/pre>/g;
+    // Create a temporary element to hold the HTML content
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
     
-    htmlContent = htmlContent.replace(codeBlockRegex, (match, codeContent) => {
-        // Unescape HTML entities
-        const unescapedCode = codeContent
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&amp;/g, '&')
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'")
-            .replace(/&nbsp;/g, ' ');
-        
-        // Auto-detect language and highlight
-        const highlighted = hljs.highlightAuto(unescapedCode);
-        
-        // Return the highlighted code wrapped in pre and code tags
-        return `<pre><code class="hljs ${highlighted.language}">${highlighted.value}</code></pre>`;
+    // Find all code blocks
+    const codeBlocks = tempElement.querySelectorAll('pre code');
+    
+    codeBlocks.forEach((block) => {
+        if (block instanceof HTMLElement) {
+            // Unescape HTML entities
+            const unescapedCode = block.innerHTML
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+            
+            block.textContent = unescapedCode;
+            
+            // Check if a language class is present
+            const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+            
+            if (languageClass) {
+                // If language is specified, use it
+                const language = languageClass.replace('language-', '');
+                hljs.highlightElement(block);
+            } else {
+                // If no language is specified, use auto-detection
+                hljs.highlightElement(block);
+            }
+            
+            // Add the hljs class
+            block.classList.add('hljs');
+        }
     });
     
-    retElement.innerHTML = htmlContent;
+    // Set the processed content back to the return element
+    retElement.innerHTML = tempElement.innerHTML;
     return retElement;
 }
 

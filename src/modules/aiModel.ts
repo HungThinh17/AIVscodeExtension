@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 export async function callOllamaModel(promptText: string, emitter: EventEmitter): Promise<void> {
     const apiEndpoint = "http://localhost:11434/api/generate"; // Ollama API URL
-    const model = "llama2"; // Model name
+    const model = "qwen2.5-coder"; // Model name
 
     const requestBody = {
         model,
