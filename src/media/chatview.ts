@@ -42,18 +42,72 @@ let vscode: VSCodeAPI;
 const parser = new commonmark.Parser();
 const renderer = new commonmark.HtmlRenderer();
 
+function addBottomLineToCodeBlock(block: HTMLElement): void {
+    // Create the bottom line
+    const bottomLine = document.createElement('div');
+    bottomLine.className = 'code-bottom-line';
+
+    // Language display
+    const languageDisplay = document.createElement('span');
+    languageDisplay.className = 'language-display';
+
+    // Buttons container
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'code-buttons';
+
+    // Copy button
+    const copyButton = document.createElement('button');
+    copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+    copyButton.title = 'Copy code';
+    copyButton.onclick = () => {
+        navigator.clipboard.writeText(block.textContent || '').then(() => {
+            copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            }, 2000);
+        });
+    };
+
+    // Apply button
+    const applyButton = document.createElement('button');
+    applyButton.innerHTML = '<i class="fas fa-check"></i> Apply';
+    applyButton.title = 'Apply code';
+    applyButton.onclick = () => {
+        // Define your apply functionality here
+        console.log('Apply button clicked');
+        applyButton.innerHTML = '<i class="fas fa-check-double"></i> Applied!';
+        setTimeout(() => {
+            applyButton.innerHTML = '<i class="fas fa-check"></i> Apply';
+        }, 2000);
+    };
+
+    buttonsContainer.appendChild(copyButton);
+    buttonsContainer.appendChild(applyButton);
+
+    bottomLine.appendChild(languageDisplay);
+    bottomLine.appendChild(buttonsContainer);
+
+    // Detect language
+    const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+    if (languageClass) {
+        const language = languageClass.replace('language-', '');
+        languageDisplay.textContent = language.charAt(0).toUpperCase() + language.slice(1);
+    } else {
+        languageDisplay.textContent = 'Code';
+    }
+
+    // Insert the bottom line after the code block
+    block.parentElement?.insertBefore(bottomLine, block.nextSibling);
+}
+
 function formatMessage(message: string): HTMLElement {
     const retElement = document.createElement('div');
     const parsed = parser.parse(message);
-    
-    // Convert the parsed content to HTML
     let htmlContent = renderer.render(parsed);
     
-    // Create a temporary element to hold the HTML content
     const tempElement = document.createElement('div');
     tempElement.innerHTML = htmlContent;
     
-    // Find all code blocks
     const codeBlocks = tempElement.querySelectorAll('pre code');
     
     codeBlocks.forEach((block) => {
@@ -68,24 +122,22 @@ function formatMessage(message: string): HTMLElement {
             
             block.textContent = unescapedCode;
             
-            // Check if a language class is present
             const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
-            
             if (languageClass) {
-                // If language is specified, use it
+                block.classList.remove(languageClass);
                 const language = languageClass.replace('language-', '');
-                hljs.highlightElement(block);
+                block.classList.add('hljs', language);
             } else {
-                // If no language is specified, use auto-detection
-                hljs.highlightElement(block);
+                block.classList.add('hljs');
             }
             
-            // Add the hljs class
-            block.classList.add('hljs');
+            hljs.highlightElement(block);
+
+            // Add bottom line to the code block
+            addBottomLineToCodeBlock(block);
         }
     });
     
-    // Set the processed content back to the return element
     retElement.innerHTML = tempElement.innerHTML;
     return retElement;
 }

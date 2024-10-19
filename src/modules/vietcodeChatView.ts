@@ -38,7 +38,7 @@ export class ChatWebviewView implements vscode.WebviewViewProvider {
         const cssUri = this.webviewView?.webview.asWebviewUri(cssPathOnDisk);
 
         const hljscssPathOnDisk = vscode.Uri.file(
-            path.join(this.context.extensionPath, 'src/media/hljscss', 'vs2015.css')
+            path.join(this.context.extensionPath, 'src/media/hljscss', 'atom-one-dark.css')
         );
         const hljscssUri = this.webviewView?.webview.asWebviewUri(hljscssPathOnDisk);
     
